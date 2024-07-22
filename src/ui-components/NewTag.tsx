@@ -8,20 +8,9 @@ import {
   ModalBody,
   ModalCloseButton,
   Button,
-  Textarea,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-//   MenuItemOption,
-//   MenuGroup,
-//   MenuOptionGroup,
-//   MenuDivider,
-  Circle,
   Input,
 } from '@chakra-ui/react'
 
-import React from 'react';
 import { type Tag } from '../App';
 import { HexColorPicker } from 'react-colorful';
 import { getUUID } from '../utils/crypto';
@@ -33,7 +22,7 @@ type AddTagProps = {
 };
 
 
-export const NewTag = (props: AddTagProps) => {
+export const NewTag = ({onSave, isOpen, onClose}: AddTagProps) => {
     const [tag, setTag] = useState({
         id: getUUID(),
         label: '',
@@ -43,7 +32,7 @@ export const NewTag = (props: AddTagProps) => {
         if (tag.label === '' ) {
             return
         } else {
-            // props.onSave(tag);
+            onSave(tag);
         }
     }
     const handleInputChange = (val: string) => {
@@ -53,7 +42,7 @@ export const NewTag = (props: AddTagProps) => {
         setTag({...tag, color: val})
     }
     return (
-        <Modal isOpen={props.isOpen} onClose={props.onClose}>
+        <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Add tag</ModalHeader>
@@ -67,7 +56,7 @@ export const NewTag = (props: AddTagProps) => {
                     <Button colorScheme='blue' onClick={() => saveTag()}>
                         Zapisz
                     </Button>
-                    <Button variant='ghost' onClick={props.onClose}>
+                    <Button variant='ghost' onClick={onClose}>
                         Anuluj
                     </Button>
                 </ModalFooter>
