@@ -25,16 +25,16 @@ const sortOptions: Array<{ name: string, key: SortKeys, isAsc: boolean }> = [{
   isAsc: false,
 }];
 
-export const SortSelect = (props: SortSelectProps) => {
+export const SortSelect = ({selectedSortMethodKeyComputed, onSortChange}: SortSelectProps) => {
 
   const sortBy = (val:SortKeyAndAscAsString) => {
-    props.onSortChange(val);
+    onSortChange(val);
   }
 
   return (
     <div>
       <Select
-        value={props.selectedSortMethodKeyComputed}
+        value={selectedSortMethodKeyComputed}
         placeholder='Sortowanie'
         onChange={e => sortBy(e.target.value as SortKeyAndAscAsString)}
       >

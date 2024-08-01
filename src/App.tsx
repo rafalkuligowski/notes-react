@@ -8,7 +8,7 @@ import { getUUID } from './utils/crypto';
 import { NoteEditor } from './ui-components/NoteEditor';
 import { NewTag } from './ui-components/NewTag';
 import { SortSelect } from './ui-components/SortSelect';
-import { type Note as NoteType, type Tag, type EditorDataAction, type SortKeys, type SortKeyAndAscAsString } from './types';
+import { type Note as NoteType, type Tag, type EditorDataAction, type SortKeys, type SortKeyAndAscAsString, Status } from './types';
 
 // TODO: 0. add lucide-react icons and extend search input with search icon
 // TODO: 1. style note and add edit button + get background color from tagId (getTagColor)
@@ -21,7 +21,7 @@ import { type Note as NoteType, type Tag, type EditorDataAction, type SortKeys, 
 // TODO: 6. add sortBy functionality by either dateCreated or lastModified
 
 // TODO: 7. Add select to add status note (nowe, w trakcie, zakończone)
-// TODO: 8. show status task
+// TODO: 8. Show status task
 // TODO: 9. Manage statuses UI
 
 const initialTags: Tag[] = [
@@ -40,7 +40,7 @@ const initialTags: Tag[] = [
 function modifyEditorData(_state: NoteType, action: EditorDataAction) {
     switch (action.type) {
         case 'new':
-            return { id: getUUID(), content: '', tagId: null, dateCreated: new Date(), dateLastModified: null, type: "new", imageUrl: '', status: 'new' }
+            return { id: getUUID(), content: '', tagId: null, dateCreated: new Date(), dateLastModified: null, type: "new", imageUrl: '', status: { id: 1, label: 'nowa' } }
         case 'edit':
             return { ...action.payload, type: 'edit' }
     }
@@ -55,7 +55,7 @@ function App() {
         dateCreated: new Date('December 17, 1995 03:24:00'),
         dateLastModified: new Date('June 26, 2024 03:24:00'),
         imageUrl: `https://picsum.photos/id/${Math.floor(Math.random() * 90)}/200/200`,
-        status: 'nowa'
+        status: { id: 1, label: 'nowa' }
     }, {
         id: 'xxxx',
         content: 'siema pranie',
@@ -63,7 +63,7 @@ function App() {
         dateCreated: new Date('December 12, 2021 03:24:00'),
         dateLastModified: new Date('June 22, 2024 03:24:00'),
         imageUrl: `https://picsum.photos/id/${Math.floor(Math.random() * 90)}/200/200`,
-        status: 'w trakcie'
+        status: { id: 2, label: 'w trakcie' }
     }, {
         id: 'xxrwe',
         content: 'trzecia notatka',
@@ -71,7 +71,7 @@ function App() {
         dateCreated: new Date('December 12, 2000 03:24:00'),
         dateLastModified: new Date('June 22, 2022 02:24:00'),
         imageUrl: `https://picsum.photos/id/${Math.floor(Math.random() * 90)}/200/200`,
-        status: 'zakończona'
+        status: { id: 3, label: 'zakończona' }
     }, {
         id: 'ggxx',
         content: 'czwarta notatka',
@@ -79,15 +79,19 @@ function App() {
         dateCreated: new Date('December 12, 2017 03:24:00'),
         dateLastModified: new Date('June 22, 2019 03:24:00'),
         imageUrl: `https://picsum.photos/id/${Math.floor(Math.random() * 90)}/200/200`,
-        status: 'nowa'
+        status: { id: 1, label: 'nowa' }
     }]);
     const [searchString, setSearchString] = useState('');
     const [sortMethod, setSortMethod] = useState<{ key: SortKeys, isAsc: boolean }>({ key: 'dateCreated', isAsc: true });
 
-    const [newEditorData, setNewEditorDataDispatch] = useReducer(modifyEditorData, { id: getUUID(), content: '', tagId: null, dateCreated: new Date(), dateLastModified: null, imageUrl: null, status: '', type: "new" });
+    const [newEditorData, setNewEditorDataDispatch] = useReducer(modifyEditorData, { id: getUUID(), content: '', tagId: null, dateCreated: new Date(), dateLastModified: null, imageUrl: null, status: { id: 1, label: 'nowa' }, type: "new" });
     const { isOpen: isEditorOpen, onOpen: onEditorOpen, onClose: onEditorClose } = useDisclosure()
     const { isOpen: isNewTagOpen, onOpen: onNewTagOpen, onClose: onNewTagClose } = useDisclosure()
-
+    const statuses: Status[] = [
+        {id: 1, label: 'nowa'},
+        {id: 2, label: 'w trakcie'},
+        {id: 3, label: 'zakończona'}
+    ]
     const getTagColor = (tagId: number | null) => {
         const defaultTagColor = '#eee';
         if (!tagId) return defaultTagColor;
@@ -103,8 +107,9 @@ function App() {
                 omit(tempNotes[existingNoteId], ['dateLastModified']),
                 omit(newNote, ['dateLastModified'])
             );
+            console.log("equal");
             if (result) return;
-
+            console.log("not equal");
             tempNotes[existingNoteId] = newNote;
             setNotes(tempNotes);
         } else {
@@ -151,24 +156,23 @@ function App() {
     }
 
     const orderNotesBySortMethod = (notes: NoteType[], sortMethod: { key: SortKeys, isAsc: boolean }) => {
-        // console.log(sortMethod);
         // To explain: why sortMethod.key instead of sortMethod.isAsc?
-        return sortMethod.key === 'dateCreated' ? sortBy(notes, [sortMethod.key], sortMethod.isAsc) : sortBy(notes, [sortMethod.key], sortMethod.isAsc).reverse();
-        // return sortBy(notes, sortMethod.key, sortMethod.isAsc);
+        // return sortMethod.key === 'dateCreated' ? sortBy(notes, [sortMethod.key], sortMethod.isAsc) : sortBy(notes, [sortMethod.key], sortMethod.isAsc).reverse();
+        return sortBy(notes, sortMethod.key, sortMethod.isAsc);
     }
 
     // const sortBy = (arr: NoteType[], keys: string[], reverse: boolean) => {
-    const sortBy = (arr: NoteType[], keys: string[], reverse: boolean) => {
-        return reverse ? arr.sort((a, b) => keys.reduce((acc, key) => acc !== 0 ? acc : a[key] - b[key], 0)) : arr.sort((a, b) => keys.reduce((acc, key) => acc !== 0 ? acc : a[key] - b[key], 0)).reverse();
-        // arr.sort((a, b) => {
-        //     const keyA = a[key];
-        //     const keyB = b[key];
-        //     if (keyA < keyB) return -1;
-        //     if (keyA > keyB) return 1;
-        //     return 0;
-        // })
-        // reverse ? arr.reverse() : arr;
-        // console.log(arr);
+    const sortBy = (arr: NoteType[], key: string, isNotReverse: boolean) => {
+        // return reverse ? arr.sort((a, b) => keys.reduce((acc, key) => acc !== 0 ? acc : a[key] - b[key], 0)) : arr.sort((a, b) => keys.reduce((acc, key) => acc !== 0 ? acc : a[key] - b[key], 0)).reverse();
+        arr.sort((a, b) => {
+            const keyA = a[key];
+            const keyB = b[key];
+            if (keyA < keyB) return -1;
+            if (keyA > keyB) return 1;
+            return 0;
+        })
+        isNotReverse ? arr : arr.reverse();
+        return arr;
     }
 
     const orderedNotes: NoteType[] = orderNotesBySortMethod(notes, sortMethod);
@@ -205,7 +209,7 @@ function App() {
                     </VStack>
                 </Box>
             </Flex>
-            <NoteEditor onSave={addNote} notePayload={newEditorData} isOpen={isEditorOpen} tags={tags} onClose={onEditorClose} />
+            <NoteEditor onSave={addNote} notePayload={newEditorData} isOpen={isEditorOpen} statuses={statuses} tags={tags} onClose={onEditorClose} />
             <NewTag onSave={addTag} isOpen={isNewTagOpen} onClose={onNewTagClose} />
         </>
     )

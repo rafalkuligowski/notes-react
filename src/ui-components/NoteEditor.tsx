@@ -17,7 +17,7 @@ import {
     Select,
 } from '@chakra-ui/react'
 
-import { Tag, type Note } from '../types/index'
+import { Status, Tag, type Note } from '../types/index'
 import React from 'react';
 import axios from 'axios';
 
@@ -27,7 +27,8 @@ type NoteEditorProps = {
     notePayload: Note;
     isOpen: boolean;
     onClose: () => void;
-    tags: Array<Tag>
+    tags: Array<Tag>;
+    statuses: Status[];
 };
 
 
@@ -35,12 +36,15 @@ export const NoteEditor = (props: NoteEditorProps) => {
     const [content, setContent] = useState(props.notePayload.content);
     const [imageRandomUrl, setRandomImageUrl] = useState(props.notePayload.imageUrl);
     const [selectedTagId, setSelectedTagId] = useState(props.notePayload.tagId ?? null);
+    const [selectedStatus, setSelectedStatus] = useState(props.notePayload.status);
     const [modalTitle, setModalTitle] = useState('');
 
 
     React.useEffect(() => {
+        // can I do this in different way?
         setContent(props.notePayload.content);
         setSelectedTagId(props.notePayload.tagId ?? null);
+        setSelectedStatus(props.notePayload.status ?? null);
         setRandomImageUrl(props.notePayload.imageUrl ?? '');
         setModalTitle(props.notePayload.type === 'new' ? 'Nowa notatka' : 'Edycja notatki');
     }, [props])
@@ -57,7 +61,7 @@ export const NoteEditor = (props: NoteEditorProps) => {
             dateCreated: props.notePayload.dateCreated !== null ? props.notePayload.dateCreated : new Date(),
             dateLastModified: props.notePayload.content !== '' ? new Date() : null,
             imageUrl: imageRandomUrl,
-            status: props.notePayload.status ? props.notePayload.status : 'nowa',
+            status: selectedStatus
         }
         props.onSave(newNote);
     }
@@ -103,6 +107,21 @@ export const NoteEditor = (props: NoteEditorProps) => {
                             {props.tags.map(tag => 
                                 <MenuItem key={tag.id} icon={<Circle size="20px" bg={tag.color} />} onClick={() => setSelectedTagId(tag.id)}>
                                     {tag.label}
+                                </MenuItem>)}
+                        </MenuList>
+                    </Menu>
+                    Status:
+                    <Menu>
+                        <MenuButton
+                            as={Button}
+                            variant='outline'
+                        >
+                            {selectedStatus.label}
+                        </MenuButton>
+                        <MenuList>
+                            {props.statuses.map(status => 
+                                <MenuItem key={status.id} onClick={() => setSelectedStatus(status)}>
+                                    {status.label}
                                 </MenuItem>)}
                         </MenuList>
                     </Menu>

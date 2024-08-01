@@ -12,7 +12,12 @@ export type Note = {
     dateCreated: Date;
     dateLastModified: null | Date;
     imageUrl: string | null,
-    status: string,
+    status: Status;
+}
+
+export type Status = {
+    id: number;
+    label: string;
 }
 
 export type SortKeys = 'dateCreated' | 'dateLastModified';
