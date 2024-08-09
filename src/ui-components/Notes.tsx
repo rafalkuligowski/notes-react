@@ -122,14 +122,16 @@ export const Notes = ({tags}: Props) => {
   const addNote = (newNote: NoteType) => {
       const existingNoteId = notes.findIndex(n => n.id === newNote.id);
       if (existingNoteId !== -1) {
-          const tempNotes = notes;
-          const result = isEqual(
-              omit(tempNotes[existingNoteId], ['dateLastModified']),
-              omit(newNote, ['dateLastModified'])
-          );
-          if (result) return;
-          tempNotes[existingNoteId] = newNote;
-          setNotes(tempNotes);
+          // const tempNotes = notes;
+          // const result = isEqual(
+          //     omit(tempNotes[existingNoteId], ['dateLastModified']),
+          //     omit(newNote, ['dateLastModified'])
+          // );
+          // if (result) return;
+          // tempNotes[existingNoteId] = newNote;
+          // setNotes(tempNotes);
+          // Why not?
+          setNotes(notes.map(note => note.id === newNote.id ? newNote : note));
       } else {
           setNotes([...notes, newNote]);
       }
