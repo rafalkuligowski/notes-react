@@ -94,6 +94,7 @@ export const NoteEditor = (props: NoteEditorProps) => {
                 <ModalHeader>{modalTitle}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
+                <form onSubmit={() => saveNote()}>
                     <Textarea value={content} onChange={(e) => handleTextAreaChange(e.target.value)} placeholder='Wpisz tekst notatki' size="md" />
 
                     <Menu>
@@ -132,6 +133,7 @@ export const NoteEditor = (props: NoteEditorProps) => {
                             <option key={status.name} value={tag.name}>{tag.name}</option>
                         ))}
                     </Select> */}
+                    </form>
                 </ModalBody>
 
                 <ModalFooter gap="3">
